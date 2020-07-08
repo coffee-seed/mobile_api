@@ -1,0 +1,147 @@
+CREATE USER salamport_user@localhost IDENTIFIED BY 'passcode123';
+ 
+CREATE DATABASE salamport;
+ 
+GRANT ALL PRIVILEGES ON salamport.* TO salamport_user@localhost; 
+
+CREATE TABLE `users`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `name`         VARCHAR(30),
+        `surname`      VARCHAR(30),
+        `middlename`   VARCHAR(30),
+        `birthdate`    VARCHAR(10),
+        `password`     VARCHAR(64),
+        `email`        VARCHAR(99),
+        `phone`        VARCHAR(20),
+        `login`        VARCHAR(99),
+        `country`      INT(11),
+        `sex`          INT(11),
+        `city`         VARCHAR(99),
+        `native_city`   VARCHAR(99),
+        `status`       VARCHAR(255),
+        `bio`          LONGTEXT,
+        `level`        INT(11),
+        `stydu`        VARCHAR(255),
+        `job`          VARCHAR(255),
+        `photo`        LONGTEXT,
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE vk_auth(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `vk_id`        INT(11),
+        `user_id`      INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `connect`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `session`      VARCHAR(64),
+        `token`        VARCHAR(64),
+        PRIMARY KEY(id)
+);
+CREATE TABLE `videos`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `name`         VARCHAR(255),
+        `author`       INT(11),
+        `date`         INT(11),
+        `text`         VARCHAR(255),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `videos_views`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `photo_views`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `photos`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `name`         VARCHAR(255),
+        `author`       INT(11),
+        `date`         INT(11),
+        `text`         VARCHAR(255),
+        PRIMARY KEY(id)
+);
+
+
+CREATE TABLE `groups`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `author`       INT(11),
+        `text`         VARCHAR(255),
+        `name`         VARCHAR(255),
+        `date`         INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `groups_members`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `group_id`     INT(11),
+        `member_id`    INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `posts`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `group_id`     INT(11),
+        `member_id`    INT(11),
+        `text`         LONGTEXT,
+        `video`        INT(11) DEFAULT 0,
+        `photo1`       INT(11) DEFAULT 0,
+        `photo2`       INT(11) DEFAULT 0,
+        `photo3`       INT(11) DEFAULT 0,
+        `photo4`       INT(11) DEFAULT 0,
+        `photo5`       INT(11) DEFAULT 0,
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `music`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `name`         VARCHAR(255),
+        `author_name`  VARCHAR(255),
+        `author`       INT(11),
+        `date`         INT(11),
+        `text`         VARCHAR(255),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `music_list`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        `music_id`     INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `friends`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      VARCHAR(255),
+        `friend_id`    VARCHAR(255),
+        `status`       INT(2),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `chat`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `name`         VARCHAR(255),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `chat_members`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `chat_id`      INT(11),
+        `user_id`      INT(11),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `chat_example_messages`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `text`         LONGTEXT,
+        `sender_id`    INT(11),
+        PRIMARY KEY(id)
+);
