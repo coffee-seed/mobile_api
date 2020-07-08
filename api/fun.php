@@ -24,12 +24,40 @@
         return false;
       }
     }
-    function user_chats($id){
+    function chat_validity($user_id,$chat_id){
       $link=my_connect();
-      $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."';");
+      $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$user_id."' AND `chat_id`='".$chat_id."';");
       mysqli_close($link);
-      $re=mysqli_fetch_assoc($res);
-      return $re['user_id'];
+      if($re=mysqli_num_rows($res)>0){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    function chat_validity($chat_id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100");
+      mysqli_close($link);
+      if($re=mysqli_num_rows($res)>0){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    send_message($chat_id,$text){
+      $link=my_connect();
+      $res=mysqli_query($link,"INSERT INTO `chat_".$chat_id."_messages` SET `sender_id`='".$id."';");
+      mysqli_close($link);
+      return true;
+    }
+    $link=my_connect();
+    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."',`text`="'.$text.'";");
+    mysqli_close($link);
+    function user_chats($id){
+    $re=mysqli_fetch_assoc($res);
+    return $re['user_id'];
     }
     function user_data($id){
       $link=my_connect();
