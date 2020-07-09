@@ -36,6 +36,7 @@ CREATE TABLE vk_auth(
 
 CREATE TABLE `connect`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
         `session`      VARCHAR(64),
         `token`        VARCHAR(64),
         PRIMARY KEY(id)
@@ -143,5 +144,14 @@ CREATE TABLE `chat_example_messages`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `text`         LONGTEXT,
         `sender_id`    INT(11),
+        `read`         BOOLEAN,
+        PRIMARY KEY(id)
+);
+CREATE TABLE `geo`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        `latitude`     FLOAT(10,6),
+        `longitude`    FLOAT(10,6),
+        `date`         VARCHAR(255),
         PRIMARY KEY(id)
 );

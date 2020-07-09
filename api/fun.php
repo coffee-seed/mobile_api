@@ -7,7 +7,7 @@
     function normal_auth($login,$password){
       $link=my_connect();
       mysqli_real_escape_string($link, $login);
-        $res=mysqli_query($link,"SELECT `id` FROM `users` where `login`='".$login."' AND `password` =".password_hash($password).";");
+        $res=mysqli_query($link,"SELECT `id` FROM `users` where `login`='".$login."' AND `password` =".my_password_hash($password).";");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
         return get_auth_token($re['id']);
@@ -35,7 +35,7 @@
         return false;
       }
     }
-    function chat_validity($chat_id){
+    function chat_messages($chat_id){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100");
       mysqli_close($link);
@@ -46,16 +46,16 @@
         return false;
       }
     }
-    send_message($chat_id,$text){
+    function send_message($chat_id,$text){
       $link=my_connect();
       $res=mysqli_query($link,"INSERT INTO `chat_".$chat_id."_messages` SET `sender_id`='".$id."';");
       mysqli_close($link);
       return true;
     }
-    $link=my_connect();
-    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."',`text`="'.$text.'";");
-    mysqli_close($link);
     function user_chats($id){
+    $link=my_connect();
+    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."',`text`='".$text."';");
+    mysqli_close($link);
     $re=mysqli_fetch_assoc($res);
     return $re['user_id'];
     }
@@ -64,7 +64,7 @@
       $res=mysqli_query($link,"SELECT * FROM `users` WHERE `id`='".$id."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
-          return json_encode($re);
+          return json_encode($re,JSON_UNESCAPED_UNICODE);
       }
       else{
         return "false";
@@ -98,11 +98,11 @@
         $res=mysqli_query($link,"SELECT `user_id` FROM `vk_auth` where `vk_id` =".$vk_id.";");
         mysqli_close($link);
         if(mysqli_num_rows($res)>0){
-          return json_encode(get_auth_token(mysqli_fetch_assoc($res)['user_id']));
+          return json_encode(get_auth_token(mysqli_fetch_assoc($res)['user_id']),JSON_UNESCAPED_UNICODE);
         }
         else{
-          $id=vk_reg($vk_id, $ans['response']['0']['first_name'],$ans['response']['0']['last_name']);
-          return json_encode(get_auth_token(mysqli_fetch_assoc($id)));
+          $id=vk_reg($vk_id, $ans['response']['0']['first_name'],$ans['response']['0']['last_name'],JSON_UNESCAPED_UNICODE);
+          return json_encode(get_auth_token(($id)),JSON_UNESCAPED_UNICODE);
         }
         }
         else{
@@ -117,13 +117,13 @@
       $link=my_connect();
       $session=gen_token();
       $token=gen_token();
-      $res=mysqli_query($link,"INSERT INTO `connect` SET `session`='".$session."', `token`='".$token."';");
+      $res=mysqli_query($link,"INSERT INTO `connect` SET `user_id`='".$user_id."', `session`='".$session."', `token`='".$token."';");
       return array('session'=>$session,'token'=>$token);
       mysqli_close($link);
     }
     function gen_token(){
+      return hash('sha256', random_bytes(64));
     }
-    return hash('sha256', time());
     function vk_reg($vk_id,$name,$surname){
       $link=my_connect();
       $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."';");
@@ -132,14 +132,14 @@
       mysqli_close($link);
       return $ret;
     }
-    function password_hash($pass){
+    function my_password_hash($pass){
       $salt1='bla bla bla';
       $salt2='something';
       return hash('sha256',hash('sha256', $pass.$salt1).$salt2);
     }
     function normal_reg($login,$email,$password,$name,$surname){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname.", `login`='".$login."',email='".$email."',password='".password_hash($password)."';");
+      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname.", `login`='".$login."',email='".$email."',password='".my_password_hash($password)."';");
       $ret=mysqli_insert_id($link);
       mysqli_close($link);
       return get_auth_token($ret);
