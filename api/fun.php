@@ -35,10 +35,43 @@
         return false;
       }
     }
+    function chat_members($chat_id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `user_id` FROM `chat_members` WHERE `chat_id`='".$chat_id."';");
+      mysqli_close($link);
+      if($re=mysqli_fetch_assoc($res)>0){
+        $arr= array(0=>$re['user_id']);
+        while($re=mysqli_fetch_assoc($res)){
+          arry_push($arr, $re['user_id']);
+        }
+        return json_encode($arr,JSON_UNESCAPED_UNICODE);
+      }
+      else{
+        return false;
+      }
+    }
+    function add_geo($user_id,$lat,$lon){
+      $date = date_format(date_create('2000-01-01'),'Y-m-d H:i:s');
+      $link=my_connect();
+      $res=mysqli_query($link,"INSERT INTO `geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.", `date`=".$date.";");
+      mysqli_close($link);
+    }
     function chat_messages($chat_id){
       $link=my_connect();
-      $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100");
+      $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100;");
       mysqli_close($link);
+      if($re=mysqli_num_rows($res)>0){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    function chat_info($chat_id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT * FROM `chat` WHERE `id`=".$chat_id.";");
+      mysqli_close($link);
+      return false;
       if($re=mysqli_num_rows($res)>0){
         return true;
       }
@@ -53,12 +86,26 @@
       return true;
     }
     function user_chats($id){
+    $arr=array();
     $link=my_connect();
-    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."',`text`='".$text."';");
+    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."';");
     mysqli_close($link);
-    $re=mysqli_fetch_assoc($res);
-    return $re['user_id'];
+    while($re=mysqli_fetch_assoc($res)){
+        arry_push($arr,$re['user_id']);
     }
+
+    return json_encode($arr);
+    }
+    function create_chat($id,$name){
+      $link=my_connect();
+      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='".$name."';");
+      $chat_id=mysqli_insert_id($link);
+      $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
+      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$user_id."';");
+      mysqli_close($link);
+      return json_encode(array(0=>$chat_id));
+    }
+
     function user_data($id){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT * FROM `users` WHERE `id`='".$id."';");
@@ -70,7 +117,7 @@
         return "false";
       }
     }
-    function edit_users($name,$surname,$middle_name,$birthdate,$sex,$city,$native_city,$phone,$email,$study,$job,$bio){
+    function edit_user($id,$name,$surname,$middle_name,$birthdate,$sex,$city,$native_city,$phone,$email,$study,$job,$bio){
       $link=my_connect();
       mysqli_real_escape_string($link,$name);
       mysqli_real_escape_string($link,$surname);
@@ -84,15 +131,16 @@
       mysqli_real_escape_string($link,$study);
       mysqli_real_escape_string($link,$job);
       mysqli_real_escape_string($link,$bio);
-      $res=mysqli_query($link,"INSET INTO `users` SET `name`='".$name."',`surname`='".$surname."',`middle_name`='".$middle_name."',`birthdate`='".$birthdate."', `sex`='".$sex."',`city`='".$city."',`native_city`='".$native_city."',`phone`='".$phone."',`email`='".$email."',`study`='".$study."',`job`='".$job."',`bio`='".$bio."';");
+      $res=mysqli_query($link,"UPDATE `users` SET `name`='".$name."',`surname`='".$surname."',`middle_name`='".$middle_name."',`birthdate`='".$birthdate."', `sex`='".$sex."',`city`='".$city."',`native_city`='".$native_city."',`phone`='".$phone."',`email`='".$email."',`study`='".$study."',`job`='".$job."',`bio`='".$bio."' WHERE `id` =".$id.";");
+      //echo"UPDATE `users` SET `name`='".$name."',`surname`='".$surname."',`middle_name`='".$middle_name."',`birthdate`='".$birthdate."', `sex`='".$sex."',`city`='".$city."',`native_city`='".$native_city."',`phone`='".$phone."',`email`='".$email."',`study`='".$study."',`job`='".$job."',`bio`='".$bio."' WHERE `id` =".$id.";";
       mysqli_close($link);
       return true;
     }
     function vk_auth($vk_id,$token){
       $ans=json_decode(file_get_contents("https://api.vk.com/method/users.get?v=5.120&access_token=".$token),true);
+      $link=my_connect();
       if(isset($ans['response']['0']['id'])){
         if($ans['response']['0']['id']==$vk_id){
-        $link=my_connect();
         mysqli_real_escape_string($link, $vk_id);
         mysqli_real_escape_string($link, $token);
         $res=mysqli_query($link,"SELECT `user_id` FROM `vk_auth` where `vk_id` =".$vk_id.";");
@@ -143,5 +191,20 @@
       $ret=mysqli_insert_id($link);
       mysqli_close($link);
       return get_auth_token($ret);
+    }
+    function dating_status($id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
+      return array('session'=>$session,'token'=>$token);
+      mysqli_close($link);
+    }
+    function set_dating_status($id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
+      return array('session'=>$session,'token'=>$token);
+      mysqli_close($link);
+    }
+    function get_dating($id, $radius,$sex,$age){
+
     }
 ?>

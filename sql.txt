@@ -8,20 +8,21 @@ CREATE TABLE `users`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `name`         VARCHAR(30),
         `surname`      VARCHAR(30),
-        `middlename`   VARCHAR(30),
+        `middle_name`   VARCHAR(30),
         `birthdate`    VARCHAR(10),
         `password`     VARCHAR(64),
         `email`        VARCHAR(99),
         `phone`        VARCHAR(20),
         `login`        VARCHAR(99),
         `country`      INT(11),
+        `language`     INT(11),
         `sex`          INT(11),
         `city`         VARCHAR(99),
-        `native_city`   VARCHAR(99),
+        `native_city`  VARCHAR(99),
         `status`       VARCHAR(255),
         `bio`          LONGTEXT,
         `level`        INT(11),
-        `stydu`        VARCHAR(255),
+        `study`        VARCHAR(255),
         `job`          VARCHAR(255),
         `photo`        LONGTEXT,
         PRIMARY KEY(id)
@@ -47,6 +48,7 @@ CREATE TABLE `videos`(
         `author`       INT(11),
         `date`         INT(11),
         `text`         VARCHAR(255),
+        `file`         LONGTEXT,
         PRIMARY KEY(id)
 );
 
@@ -68,9 +70,9 @@ CREATE TABLE `photos`(
         `author`       INT(11),
         `date`         INT(11),
         `text`         VARCHAR(255),
+        `file`         LONGTEXT,
         PRIMARY KEY(id)
 );
-
 
 CREATE TABLE `groups`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
@@ -78,6 +80,7 @@ CREATE TABLE `groups`(
         `text`         VARCHAR(255),
         `name`         VARCHAR(255),
         `date`         INT(11),
+        `photo`         LONGTEXT,
         PRIMARY KEY(id)
 );
 
@@ -109,6 +112,8 @@ CREATE TABLE `music`(
         `author`       INT(11),
         `date`         INT(11),
         `text`         VARCHAR(255),
+        `file`         LONGTEXT,
+        `photo`         LONGTEXT,
         PRIMARY KEY(id)
 );
 
@@ -130,6 +135,8 @@ CREATE TABLE `friends`(
 CREATE TABLE `chat`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `name`         VARCHAR(255),
+        `private`      BOOLEAN,
+        `photo`        LONGTEXT,
         PRIMARY KEY(id)
 );
 
@@ -145,13 +152,38 @@ CREATE TABLE `chat_example_messages`(
         `text`         LONGTEXT,
         `sender_id`    INT(11),
         `read`         BOOLEAN,
+        
         PRIMARY KEY(id)
 );
+
 CREATE TABLE `geo`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `user_id`      INT(11),
         `latitude`     FLOAT(10,6),
         `longitude`    FLOAT(10,6),
         `date`         VARCHAR(255),
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `dating`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        `use`         BOOLEAN,
+        PRIMARY KEY(id)
+);
+
+
+CREATE TABLE `try_match`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `try_id`      INT(11),
+        `for_id`      INT(11),
+        `aborted`         BOOLEAN,
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE `match`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user1`      INT(11),
+        `user2`      INT(11),
         PRIMARY KEY(id)
 );
