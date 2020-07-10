@@ -22,6 +22,54 @@ Token<input name='token'>
 <input  type='submit'>
 </form>
 <hr>
+<h2>my_dating_status.php</h2>
+<form method='post' action='my_dating_status.php'>
+Session<input name='session'>
+Token<input name='token'>
+<input  type='submit'>
+</form>
+<hr>
+<h2>set_dating_status.php</h2>
+<form method='post' action='set_dating_status.php'>
+Session<input name='session'>
+Token<input name='token'>
+Use<input name='use'>
+<input  type='submit'>
+</form>
+<hr>
+<h2>get_dating.php</h2>
+<form method='post' action='get_dating.php'>
+Session<input name='session'>
+Token<input name='token'>
+Radius (part of lat)<input name='radius'>
+$ex (1 - man, 2 -woman)<input name='sex'>
+min_b (Date format 2020-01-01)<input name='min_b'>
+max_b (Date format 2020-01-01)<input name='max_b'>
+<input  type='submit'>
+</form>
+<hr>
+<h2>friends.php</h2>
+<form method='post' action='friends.php'>
+Session<input name='session'>
+Token<input name='token'>
+<input  type='submit'>
+</form>
+<hr>
+<h2>friends_mb.php</h2>
+<form method='post' action='friends_mb.php'>
+Session<input name='session'>
+Token<input name='token'>
+<input  type='submit'>
+</form>
+<hr>
+<h2>add_friend.php</h2>
+<form method='post' action='add_friend.php'>
+  Session<input name='session'>
+  Token<input name='token'>
+  Friend id<input name='friend_id'>
+  <input  type='submit'>
+</form>
+<hr>
 <h2>view_profile.php</h2>
 <form method='post' action='view_profile.php'>
 Session<input name='session'>
@@ -100,5 +148,14 @@ Chat id<input name='chat_id'>
   Session<input name='session'>
   Token<input name='token'>
   Member id<input name='member_id'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>send_geo.php</h2>
+<form method='post' action='send_geo.php'>
+  Session<input name='session'>
+  Token<input name='token'>
+  Lat<input name='lat'>
+  Lon<input name='lon'>
   <input  type='submit'>
 </form>

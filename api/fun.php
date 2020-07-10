@@ -56,8 +56,16 @@
     function add_geo($user_id,$lat,$lon){
       $date = date("Y-m-d H:i:s");
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.", `date`=".$date.";");
+      $res=mysqli_query($link,"INSERT INTO `geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.", `date`='".$date."';");
+      $res=mysqli_query($link,"SELECT * FROM `last_geo` WHERE `user_id`=".$user_id.";");
+      if(mysqli_num_rows($res)>0){
+      	 $res=mysqli_query($link,"UPDATE `last_geo` SET `latitude`=".$lat.", `longitude`=".$lon." WHERE `user_id`=".$user_id.";");
+      }
+      else{
+      	$res=mysqli_query($link,"INSERT INTO `last_geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.";");
+      }
       mysqli_close($link);
+      return true;
     }
     function chat_messages($chat_id){
       $link=my_connect();
@@ -103,13 +111,20 @@
     
 }    function create_chat_priv($id,$uid){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='priv',`private`=1;");
-      $chat_id=mysqli_insert_id($link);
-      $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
-      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$id."';");
-      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$uid."';");
-      mysqli_close($link);
-      return json_encode(array(0=>$chat_id));
+      $res=mysqli_query($link,"SELECT `chat`.`id` FROM `chat` INNER JOIN `chat_members` ON `chat_members`.`chat_id`=`chat`.`id`  WHERE `chat`.`private`=1 AND `chat_members`.`user_id`=".$id." INTERSECT SELECT `chat`.`id` FROM `chat` INNER JOIN `chat_members` ON `chat_members`.`chat_id`=`chat`.`id`  WHERE `chat`.`private`=1 AND `chat_members`.`user_id`=".$uid.";");
+      
+      if($re=mysqli_fetch_assoc($res)){
+      	  return json_encode(array(0=>$re['id']));
+      }
+      else{
+	      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='priv',`private`=1;");
+	      $chat_id=mysqli_insert_id($link);
+	      $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
+	      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$id."';");
+	      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$uid."';");
+	      mysqli_close($link);
+	      return json_encode(array(0=>$chat_id));
+	  }
     }
     function create_chat($id,$name){
       $link=my_connect();
@@ -263,10 +278,10 @@
     }
     /*
     */
-    function set_dating_status($id,$use){
+    function set_dating_status($user_id,$use){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
-      if(mysqli_num_rows($res)>0){
+      if(mysqli_num_rows($res)<=0){
         $res=mysqli_query($link,"INSERT INTO `dating` SET `user_id`='".$user_id."',`use`='".$use."';");
       }
       else{
@@ -277,42 +292,77 @@
     }
     function dating_status($id){
       $link=my_connect();
-      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
+      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$id."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
-        return $re['use'];
+        return json_encode(array(0=>$re['use']));
       }
       else{
-        return false;
+        return json_encode(array(0=>NULL));
       }
     }
-    function get_dating($id, $radius,$sex,$age){
-
+    function get_dating($my_id,$radius,$sex,$min_b,$max_b){
+      $link=my_connect();
+      $res=mysqli_query($link, "SELECT `latitude`, `longitude` FROM `last_geo` WHERE `user_id`=".$my_id.";");
+      if($re=mysqli_fetch_assoc($res)){
+	      $ress=mysqli_query($link, "SELECT `users`.`id` `id` `last_geo`.`id` `lat`,`last_geo`.'longitude' 'lon'  from `users` INNER JOIN `dating` ON `dating`.`user_id`=`users`.`id` INNER JOIN `last_geo` ON `last_geo`.`user_id`=`users`.`id` LEFT JOIN `match`  ON (`match`.`user1`=`users`.`id` AND  `match`.`user2`=".$my_id.") OR (`match`.`user1`=".$my_id." AND  `match`.`user2`=`users`.`id`) LEFT JOIN `unmatch` ON (`unmatch`.`user1`=`users`.`id` AND `unmatch`.`user2`=".$my_id.") OR (`unmatch`.`user2`=`users`.`id` AND `unmatch`.`user1`=".$my_id.") LEFT JOIN `try_match`  ON `try_match`.`for_id`=`users`.`id` AND `try_match`.`try_id`=".$my_id." WHERE `dating`.`use`>0 AND `last_geo`.`latitude`>".$re['latitude']-$radius." AND `last_geo`.`latitude`<".$re['latitude']+$radius." AND `last_geo`.`longitude`>".$re['longitude']-$radius." AND `last_geo`.`longitude`<".$re['longitude']+$radius." AND `users`.`birthdate`>".$min_b." AND `users`.`birthdate`<".$max_b." AND `users`.`id`<>".$id." AND `users`.`sex`=".$sex.";"); 
+	    $arr=array();
+	    while($re=mysqli_fetch_assoc($ress)){
+	    	$$radius=ceil(12745594 * asin(sqrt(
+        pow(sin(deg2rad($re['lat']-$re['latitude'])/2),2)
+        +
+        cos(deg2rad($re['latitude'])) *
+        cos(deg2rad($re['lat'])) *
+        pow(sin(deg2rad($re['longitude'] -$re['lon'])/2),2))));
+	    	array_push($arr,array('id'=>$re['id'],'radius'=>$radius));
+	    }
+	    return json_encode($arr);
+	  }
+	  else{
+	  	return "err_need_geo";
+	  }
     }
     function add_friend($mid,$uid){
-      $link=my_connect();
-      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
-      if($re=mysqli_fetch_assoc($res)){
-         $res=mysqli_query($link,"UPDATE `friends` SET `status`=2 WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
-         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=2;");
-      }
-      else{
-         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=1;");
-      }
-        mysqli_close($link);
-        return true;
+      if($mid!=$uid){
+	      $link=my_connect();
+	      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
+	      if($re=mysqli_fetch_assoc($res)){
+	         $res=mysqli_query($link,"UPDATE `friends` SET `status`=2 WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
+	         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=2;");
+	      }
+	      else{
+	         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=1;");
+	      }
+	        mysqli_close($link);
+	        return true;
+	    }
+	    else{
+	    	return "false";
+	    }
     }
     function show_friends($id){
-      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."' AND status=2;");
-      return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$id."'AND status=2;");
+      $arr=array();
+      while($re=mysqli_fetch_assoc($res)){
+      	array_push($arr,$re['friend_id']);
+      }
+      mysqli_close($link);
+      return json_encode($arr,JSON_UNESCAPED_UNICODE);
     }
     function show_friend_mb($id){
-      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."' AND status=1;");
-      return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$id."' AND status=1;");
+      $arr=array();
+      while($re=mysqli_fetch_assoc($res)){
+      	array_push($arr,$re['friend_id']);
+      }
+      mysqli_close($link);
+      return json_encode($arr,JSON_UNESCAPED_UNICODE);
     }
- 	function users_search($query){
+ 	function users_search($query,$uid=false){
  	  $link=my_connect();
-      $res=mysqli_query($link,"SELECT `id` FROM `users` WHERE `name`='".$query."' OR `surname`='".$query."';");
+      $res=mysqli_query($link,"SELECT `id` FROM `users` WHERE (`name`='".$query."' OR `surname`='".$query."') AND `id`<>".$uid.";");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
       	$arr=array(0=>$re['id']);

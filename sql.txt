@@ -166,26 +166,39 @@ CREATE TABLE `geo`(
         `date`         VARCHAR(255),
         PRIMARY KEY(id)
 );
+CREATE TABLE `last_geo`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user_id`      INT(11),
+        `latitude`     FLOAT(10,6),
+        `longitude`    FLOAT(10,6),
+        PRIMARY KEY(id)
+);
 
 CREATE TABLE `dating`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `user_id`      INT(11),
-        `use`         BOOLEAN,
+        `use`          BOOLEAN DEFAULT 0,
         PRIMARY KEY(id)
 );
 
 
 CREATE TABLE `try_match`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
-        `try_id`      INT(11),
-        `for_id`      INT(11),
-        `aborted`         BOOLEAN,
+        `try_id`       INT(11),
+        `for_id`       INT(11),
+        `aborted`      BOOLEAN DEFAULT 0,
         PRIMARY KEY(id)
 );
 
+CREATE TABLE `unmatch`(
+        `id`           INT(11) NOT NULL AUTO_INCREMENT,
+        `user1`        INT(11),
+        `user2`        INT(11),
+        PRIMARY KEY(id)
+);
 CREATE TABLE `match`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
-        `user1`      INT(11),
-        `user2`      INT(11),
+        `user1`        INT(11),
+        `user2`        INT(11),
         PRIMARY KEY(id)
 );
