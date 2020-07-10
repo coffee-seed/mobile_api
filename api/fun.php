@@ -103,7 +103,7 @@
     
 }    function create_chat_priv($id,$uid){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='priv' `private`=TRUE;");
+      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='priv',`private`=1;");
       $chat_id=mysqli_insert_id($link);
       $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
       $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$id."';");
@@ -137,7 +137,7 @@
 
     function user_data($id){
       $link=my_connect();
-      $res=mysqli_query($link,"SELECT * FROM `users` WHERE `id`='".$id."';");
+      $res=mysqli_query($link,"SELECT `id`,`birthdate`, `name`,`surname` ,`middle_name`, `photo` , `email`, `phone`, `birthdate`, `country`, `language`, `sex`, `city`,`native_city`, `status`, `bio`, `study`,`job` FROM `users`  WHERE `id`='".$id."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
           return json_encode($re,JSON_UNESCAPED_UNICODE);
@@ -166,7 +166,7 @@
       return true;
     }
     function vk_auth($vk_id,$token){
-      $ans=json_decode(file_get_contents("https://api.vk.com/method/users.get?v=5.120&access_token=".$token),true);
+      $ans=json_decode(file_get_contents("https://api.vk.com/method/users.get?fields=photo_400_orig,sex,bdate,city,home_town&v=5.120&access_token=".$token),true);
       $link=my_connect();
       if(isset($ans['response']['0']['id'])){
         if($ans['response']['0']['id']==$vk_id){
@@ -178,7 +178,47 @@
           return json_encode(get_auth_token(mysqli_fetch_assoc($res)['user_id']),JSON_UNESCAPED_UNICODE);
         }
         else{
-          $id=vk_reg($vk_id, $ans['response']['0']['first_name'],$ans['response']['0']['last_name'],JSON_UNESCAPED_UNICODE);
+          $name =$ans['response']['0']['first_name'];
+          $surname=$ans['response']['0']['last_name'];
+          if(isset($ans['response']['0']['photo_400_orig'])){
+            $photo=$ans['response']['0']['photo_400_orig'];
+          }
+          else{
+          	$photo=NULL;
+          }
+          if(isset($ans['response']['0']['bdate'])){
+            $bdate=$ans['response']['0']['bdate'];
+          }
+          else{
+          	$bdate=NULL;
+          }
+          if(isset($ans['response']['0']['city'])){
+            $city=$ans['response']['0']['city']['title'];
+          }
+          else{
+          	$city=NULL;
+          }
+          if(isset($ans['response']['0']['home_town'])){
+            $home_town=$ans['response']['0']['home_town'];
+          }
+          else{
+          	$home_town=NULL;
+          }
+          if(isset($ans['response']['0']['sex'])){
+          	if($ans['response']['0']['sex']==2){
+          		$sex=1;
+          	}
+          	elseif($ans['response']['0']['sex']==1){
+          		$sex=2;
+          	}
+          	else{
+          		$sex=NULL;
+          	}
+          }
+          else{
+          	$sex=NULL;
+          }
+          $id=vk_reg($vk_id,$name,$surname,$photo,$city,$home_town,$bdate,$sex,JSON_UNESCAPED_UNICODE);
           return json_encode(get_auth_token(($id)),JSON_UNESCAPED_UNICODE);
         }
         }
@@ -201,9 +241,9 @@
     function gen_token(){
       return hash('sha256', random_bytes(64));
     }
-    function vk_reg($vk_id,$name,$surname){
+    function vk_reg($vk_id,$name,$surname,$photo,$city,$home_town,$bdate,$sex){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."';");
+      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."',`sex`=".$sex." ,`photo`='".$photo."',`city`='".$city."',`native_city`='".$home_town."',`birthdate`='".$bdate."';");
       $ret=mysqli_insert_id($link);
       $res=mysqli_query($link,"INSERT INTO `vk_auth` SET `vk_id`='".$vk_id."', `user_id`='".$ret."';");
       mysqli_close($link);
@@ -270,4 +310,19 @@
       $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."' AND status=1;");
       return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
     }
+ 	function users_search($query){
+ 	  $link=my_connect();
+      $res=mysqli_query($link,"SELECT `id` FROM `users` WHERE `name`='".$query."' OR `surname`='".$query."';");
+      mysqli_close($link);
+      if($re=mysqli_fetch_assoc($res)){
+      	$arr=array(0=>$re['id']);
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($re,$re['id']);
+      	}
+        return json_encode($arr);
+      }
+      else{
+        return false;
+      }
+ 	}
 ?>

@@ -4,6 +4,8 @@ CREATE DATABASE salamport;
  
 GRANT ALL PRIVILEGES ON salamport.* TO salamport_user@localhost; 
 
+use salamport
+
 CREATE TABLE `users`(
         `id`           INT(11) NOT NULL AUTO_INCREMENT,
         `name`         VARCHAR(30),
