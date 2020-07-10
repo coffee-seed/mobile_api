@@ -152,7 +152,7 @@ CREATE TABLE `chat_example_messages`(
         `text`         LONGTEXT,
         `sender_id`    INT(11),
         `read`         BOOLEAN,
-        
+        `date`             VARCHAR(50),        
         PRIMARY KEY(id)
 );
 

@@ -7,10 +7,13 @@
     function normal_auth($login,$password){
       $link=my_connect();
       mysqli_real_escape_string($link, $login);
-        $res=mysqli_query($link,"SELECT `id` FROM `users` where `login`='".$login."' AND `password` =".my_password_hash($password).";");
+      $res=mysqli_query($link,"SELECT `id` FROM `users` WHERE `login`='".$login."' AND `password` ='".my_password_hash($password)."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
-        return get_auth_token($re['id']);
+        return json_encode(get_auth_token($re['id']),JSON_UNESCAPED_UNICODE);
+      }
+      else{
+        return "false";
       }
     }
     function get_my_id($session, $token){
@@ -35,14 +38,14 @@
         return false;
       }
     }
-    function chat_members($chat_id){
+    function chat_members($chat_id,$uid=0){
       $link=my_connect();
-      $res=mysqli_query($link,"SELECT `user_id` FROM `chat_members` WHERE `chat_id`='".$chat_id."';");
+      $res=mysqli_query($link,"SELECT `user_id` FROM `chat_members` WHERE `chat_id`='".$chat_id."' AND `user_id`<>".$uid.";");
       mysqli_close($link);
-      if($re=mysqli_fetch_assoc($res)>0){
+      if($re=mysqli_fetch_assoc($res)){
         $arr= array(0=>$re['user_id']);
         while($re=mysqli_fetch_assoc($res)){
-          arry_push($arr, $re['user_id']);
+          array_push($arr, $re['user_id']);
         }
         return json_encode($arr,JSON_UNESCAPED_UNICODE);
       }
@@ -51,7 +54,7 @@
       }
     }
     function add_geo($user_id,$lat,$lon){
-      $date = date_format(date_create('2000-01-01'),'Y-m-d H:i:s');
+      $date = date("Y-m-d H:i:s");
       $link=my_connect();
       $res=mysqli_query($link,"INSERT INTO `geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.", `date`=".$date.";");
       mysqli_close($link);
@@ -60,50 +63,76 @@
       $link=my_connect();
       $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100;");
       mysqli_close($link);
-      if($re=mysqli_num_rows($res)>0){
-        return true;
+      if($re=mysqli_fetch_assoc($res)){
+        $arr=array(0=>$re);
+        while($re=mysqli_fetch_assoc($res)){
+          array_push($arr,$re);
+        }
+        return json_encode($arr,JSON_UNESCAPED_UNICODE);
       }
       else{
-        return false;
+        return "false";
       }
     }
     function chat_info($chat_id){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT * FROM `chat` WHERE `id`=".$chat_id.";");
       mysqli_close($link);
-      return false;
-      if($re=mysqli_num_rows($res)>0){
-        return true;
+      if($re=mysqli_fetch_assoc($res)){
+        return json_encode($re,JSON_UNESCAPED_UNICODE);
       }
       else{
-        return false;
+      	return false;
       }
     }
-    function send_message($chat_id,$text){
+    function send_message($id,$chat_id,$text){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `chat_".$chat_id."_messages` SET `sender_id`='".$id."';");
+      $res=mysqli_query($link,"INSERT INTO `chat_".$chat_id."_messages` SET `sender_id`='".$id."',`text`='".$text."',`date`='".date("Y-m-d H:i:s")."';");
       mysqli_close($link);
       return true;
     }
     function user_chats($id){
-    $arr=array();
-    $link=my_connect();
-    $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."';");
-    mysqli_close($link);
-    while($re=mysqli_fetch_assoc($res)){
-        arry_push($arr,$re['user_id']);
+      $arr=array();
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."';");
+      mysqli_close($link);
+      while($re=mysqli_fetch_assoc($res)){
+      array_push($arr,$re['chat_id']);
     }
-
     return json_encode($arr);
+    
+}    function create_chat_priv($id,$uid){
+      $link=my_connect();
+      $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='priv' `private`=TRUE;");
+      $chat_id=mysqli_insert_id($link);
+      $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
+      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$id."';");
+      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$uid."';");
+      mysqli_close($link);
+      return json_encode(array(0=>$chat_id));
     }
     function create_chat($id,$name){
       $link=my_connect();
       $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='".$name."';");
       $chat_id=mysqli_insert_id($link);
       $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
-      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$user_id."';");
+      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$id."';");
       mysqli_close($link);
       return json_encode(array(0=>$chat_id));
+    }
+    function add_chat_member($chat_id,$member_id){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `private` FROM `chat` WHERE `chat_id`='".$chat_id."';");
+      $re=mysqli_fetch_assoc($res);
+      if($re['private']==NULL OR $re['private']=='NULL' or $re['private']==false OR $re['private']==''){
+      $res=mysqli_query($link,"INSERT INTO `chat_members` SET `chat_id`='".$chat_id."' , `user_id`='".$member_id."';");
+    	  mysqli_close($link);
+      	  return true;
+  	  }
+  	  else{
+		  mysqli_close($link);
+      	  return false;	  
+  	  }
     }
 
     function user_data($id){
@@ -187,24 +216,58 @@
     }
     function normal_reg($login,$email,$password,$name,$surname){
       $link=my_connect();
-      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname.", `login`='".$login."',email='".$email."',password='".my_password_hash($password)."';");
+      $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."', `login`='".$login."',email='".$email."',password='".my_password_hash($password)."';");
       $ret=mysqli_insert_id($link);
       mysqli_close($link);
-      return get_auth_token($ret);
+      return json_encode(get_auth_token(($ret)),JSON_UNESCAPED_UNICODE);;
+    }
+    /*
+    */
+    function set_dating_status($id,$use){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
+      if(mysqli_num_rows($res)>0){
+        $res=mysqli_query($link,"INSERT INTO `dating` SET `user_id`='".$user_id."',`use`='".$use."';");
+      }
+      else{
+        $res=mysqli_query($link,"UPDATE `dating` SET `use`='".$use."' WHERE `user_id`='".$user_id."';");
+      }
+      mysqli_close($link);
+      return true;
     }
     function dating_status($id){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
-      return array('session'=>$session,'token'=>$token);
       mysqli_close($link);
-    }
-    function set_dating_status($id){
-      $link=my_connect();
-      $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
-      return array('session'=>$session,'token'=>$token);
-      mysqli_close($link);
+      if($re=mysqli_fetch_assoc($res)){
+        return $re['use'];
+      }
+      else{
+        return false;
+      }
     }
     function get_dating($id, $radius,$sex,$age){
 
+    }
+    function add_friend($mid,$uid){
+      $link=my_connect();
+      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
+      if($re=mysqli_fetch_assoc($res)){
+         $res=mysqli_query($link,"UPDATE `friends` SET `status`=2 WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
+         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=2;");
+      }
+      else{
+         $res=mysqli_query($link,"INSERT INTO `friends` SET `user_id`='".$uid."', `friend_id`='".$mid."',`status`=1;");
+      }
+        mysqli_close($link);
+        return true;
+    }
+    function show_friends($id){
+      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."' AND status=2;");
+      return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
+    }
+    function show_friend_mb($id){
+      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."' AND status=1;");
+      return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
     }
 ?>
