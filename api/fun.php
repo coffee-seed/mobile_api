@@ -18,6 +18,8 @@
     }
     function get_my_id($session, $token){
       $link=my_connect();
+      mysqli_real_escape_string($link, $session);
+      mysqli_real_escape_string($link, $token);
       $res=mysqli_query($link,"SELECT `user_id` FROM `connect` WHERE `session`='".$session."' AND `token`='".$token."' ;");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -29,6 +31,8 @@
     }
     function chat_validity($user_id,$chat_id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $user_id);
+      mysqli_real_escape_string($link, $chat_id);
       $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$user_id."' AND `chat_id`='".$chat_id."';");
       mysqli_close($link);
       if($re=mysqli_num_rows($res)>0){
@@ -40,6 +44,8 @@
     }
     function chat_members($chat_id,$uid=0){
       $link=my_connect();
+      mysqli_real_escape_string($link, $chat_id);
+      mysqli_real_escape_string($link, $uid);
       $res=mysqli_query($link,"SELECT `user_id` FROM `chat_members` WHERE `chat_id`='".$chat_id."' AND `user_id`<>".$uid.";");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -56,6 +62,9 @@
     function add_geo($user_id,$lat,$lon){
       $date = date("Y-m-d H:i:s");
       $link=my_connect();
+      mysqli_real_escape_string($link, $user_id);
+      mysqli_real_escape_string($link, $lat);
+      mysqli_real_escape_string($link, $lon);
       $res=mysqli_query($link,"INSERT INTO `geo` SET `user_id`=".$user_id.", `latitude`=".$lat.", `longitude`=".$lon.", `date`='".$date."';");
       $res=mysqli_query($link,"SELECT * FROM `last_geo` WHERE `user_id`=".$user_id.";");
       if(mysqli_num_rows($res)>0){
@@ -69,6 +78,7 @@
     }
     function chat_messages($chat_id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $chat_id);
       $res=mysqli_query($link,"SELECT * FROM `chat_".$chat_id."_messages` ORDER BY `id` DESC LIMIT 100;");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -84,6 +94,7 @@
     }
     function chat_info($chat_id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $chat_id);
       $res=mysqli_query($link,"SELECT * FROM `chat` WHERE `id`=".$chat_id.";");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -95,6 +106,9 @@
     }
     function send_message($id,$chat_id,$text){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
+      mysqli_real_escape_string($link, $chat_id);
+      mysqli_real_escape_string($link, $text);
       $res=mysqli_query($link,"INSERT INTO `chat_".$chat_id."_messages` SET `sender_id`='".$id."',`text`='".$text."',`date`='".date("Y-m-d H:i:s")."';");
       mysqli_close($link);
       return true;
@@ -102,15 +116,18 @@
     function user_chats($id){
       $arr=array();
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $res=mysqli_query($link,"SELECT `chat_id` FROM `chat_members` WHERE `user_id`='".$id."';");
       mysqli_close($link);
-      while($re=mysqli_fetch_assoc($res)){
-      array_push($arr,$re['chat_id']);
-    }
-    return json_encode($arr);
-    
-}    function create_chat_priv($id,$uid){
+      	while($re=mysqli_fetch_assoc($res)){
+      	array_push($arr,$re['chat_id']);
+      }
+      return json_encode($arr);
+	}    
+	function create_chat_priv($id,$uid){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
+      mysqli_real_escape_string($link, $uid);
       $res=mysqli_query($link,"SELECT `chat`.`id` FROM `chat` INNER JOIN `chat_members` ON `chat_members`.`chat_id`=`chat`.`id`  WHERE `chat`.`private`=1 AND `chat_members`.`user_id`=".$id." INTERSECT SELECT `chat`.`id` FROM `chat` INNER JOIN `chat_members` ON `chat_members`.`chat_id`=`chat`.`id`  WHERE `chat`.`private`=1 AND `chat_members`.`user_id`=".$uid.";");
       
       if($re=mysqli_fetch_assoc($res)){
@@ -128,6 +145,8 @@
     }
     function create_chat($id,$name){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
+      mysqli_real_escape_string($link, $name);
       $res=mysqli_query($link,"INSERT INTO `chat` SET `name`='".$name."';");
       $chat_id=mysqli_insert_id($link);
       $res=mysqli_query($link,"CREATE TABLE `chat_".$chat_id."_messages` LIKE `chat_example_messages`;");
@@ -137,6 +156,8 @@
     }
     function add_chat_member($chat_id,$member_id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $chat_id);
+      mysqli_real_escape_string($link, $member_id);
       $res=mysqli_query($link,"SELECT `private` FROM `chat` WHERE `chat_id`='".$chat_id."';");
       $re=mysqli_fetch_assoc($res);
       if($re['private']==NULL OR $re['private']=='NULL' or $re['private']==false OR $re['private']==''){
@@ -152,6 +173,7 @@
 
     function user_data($id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $res=mysqli_query($link,"SELECT `id`,`birthdate`, `name`,`surname` ,`middle_name`, `photo` , `email`, `phone`, `birthdate`, `country`, `language`, `sex`, `city`,`native_city`, `status`, `bio`, `study`,`job` FROM `users`  WHERE `id`='".$id."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -176,13 +198,14 @@
       mysqli_real_escape_string($link,$job);
       mysqli_real_escape_string($link,$bio);
       $res=mysqli_query($link,"UPDATE `users` SET `name`='".$name."',`surname`='".$surname."',`middle_name`='".$middle_name."',`birthdate`='".$birthdate."', `sex`='".$sex."',`city`='".$city."',`native_city`='".$native_city."',`phone`='".$phone."',`email`='".$email."',`study`='".$study."',`job`='".$job."',`bio`='".$bio."' WHERE `id` =".$id.";");
-      //echo"UPDATE `users` SET `name`='".$name."',`surname`='".$surname."',`middle_name`='".$middle_name."',`birthdate`='".$birthdate."', `sex`='".$sex."',`city`='".$city."',`native_city`='".$native_city."',`phone`='".$phone."',`email`='".$email."',`study`='".$study."',`job`='".$job."',`bio`='".$bio."' WHERE `id` =".$id.";";
       mysqli_close($link);
       return true;
     }
     function vk_auth($vk_id,$token){
       $ans=json_decode(file_get_contents("https://api.vk.com/method/users.get?fields=photo_400_orig,sex,bdate,city,home_town&v=5.120&access_token=".$token),true);
       $link=my_connect();
+      mysqli_real_escape_string($link, $vK_id);
+      mysqli_real_escape_string($link, $token);
       if(isset($ans['response']['0']['id'])){
         if($ans['response']['0']['id']==$vk_id){
         mysqli_real_escape_string($link, $vk_id);
@@ -247,6 +270,7 @@
     }
     function get_auth_token($user_id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $user_id);
       $session=gen_token();
       $token=gen_token();
       $res=mysqli_query($link,"INSERT INTO `connect` SET `user_id`='".$user_id."', `session`='".$session."', `token`='".$token."';");
@@ -258,6 +282,14 @@
     }
     function vk_reg($vk_id,$name,$surname,$photo,$city,$home_town,$bdate,$sex){
       $link=my_connect();
+      mysqli_real_escape_string($link, $vk_id);
+      mysqli_real_escape_string($link, $name);
+      mysqli_real_escape_string($link, $surname);
+      mysqli_real_escape_string($link, $photo);
+      mysqli_real_escape_string($link, $city);
+      mysqli_real_escape_string($link, $home_town);
+      mysqli_real_escape_string($link, $bdate);
+      mysqli_real_escape_string($link, $sex);
       $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."',`sex`=".$sex." ,`photo`='".$photo."',`city`='".$city."',`native_city`='".$home_town."',`birthdate`='".$bdate."';");
       $ret=mysqli_insert_id($link);
       $res=mysqli_query($link,"INSERT INTO `vk_auth` SET `vk_id`='".$vk_id."', `user_id`='".$ret."';");
@@ -271,6 +303,11 @@
     }
     function normal_reg($login,$email,$password,$name,$surname){
       $link=my_connect();
+      mysqli_real_escape_string($link, $login);
+      mysqli_real_escape_string($link, $email);
+      mysqli_real_escape_string($link, $password);
+      mysqli_real_escape_string($link, $name);
+      mysqli_real_escape_string($link, $surname);
       $res=mysqli_query($link,"INSERT INTO `users` SET `name`='".$name."', `surname`='".$surname."', `login`='".$login."',email='".$email."',password='".my_password_hash($password)."';");
       $ret=mysqli_insert_id($link);
       mysqli_close($link);
@@ -278,6 +315,8 @@
     }
     function set_dating_status($user_id,$use){
       $link=my_connect();
+      mysqli_real_escape_string($link, $user_id);
+      mysqli_real_escape_string($link, $use);
       $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
       if(mysqli_num_rows($res)<=0){
         $res=mysqli_query($link,"INSERT INTO `dating` SET `user_id`='".$user_id."',`use`='".$use."';");
@@ -290,6 +329,7 @@
     }
     function dating_status($id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$id."';");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -301,6 +341,11 @@
     }
     function get_dating($my_id,$radius,$sex,$min_b,$max_b){
       $link=my_connect();
+      mysqli_real_escape_string($link, $my_id);
+      mysqli_real_escape_string($link, $radius);
+      mysqli_real_escape_string($link, $sex);
+      mysqli_real_escape_string($link, $min_b);
+      mysqli_real_escape_string($link, $max_b);
       $res=mysqli_query($link, "SELECT `latitude`, `longitude` FROM `last_geo` WHERE `user_id`=".$my_id.";");
       if($ree=mysqli_fetch_assoc($res)){
 	      $ress=mysqli_query($link, "SELECT `users`.`id` `id`, `last_geo`.`latitude` `lat`,`last_geo`.`longitude` `lon`  from `users` INNER JOIN `dating` ON `dating`.`user_id`=`users`.`id` INNER JOIN `last_geo` ON `last_geo`.`user_id`=`users`.`id` LEFT JOIN `match`  ON (`match`.`user1`=`users`.`id` AND  `match`.`user2`=".$my_id.") OR (`match`.`user1`=".$my_id." AND  `match`.`user2`=`users`.`id`) LEFT JOIN `unmatch` ON (`unmatch`.`user1`=`users`.`id` AND `unmatch`.`user2`=".$my_id.") OR (`unmatch`.`user2`=`users`.`id` AND `unmatch`.`user1`=".$my_id.") LEFT JOIN `try_match`  ON `try_match`.`for_id`=`users`.`id` AND `try_match`.`try_id`=".$my_id." WHERE `dating`.`use`>0 AND `last_geo`.`latitude`>".
@@ -323,6 +368,7 @@
     }
     function get_matches($id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $arr=array();
       $res=mysqli_query($link,"SELECT `user1` `id` FROM `match` WHERE `user2`='".$id."';");
 	  while($re=mysqli_fetch_assoc($res)){
@@ -336,6 +382,9 @@
       return json_encode($arr);
     }
     function set_matches($uid,$mid,$query){
+      mysqli_real_escape_string($link, $uid);
+      mysqli_real_escape_string($link, $mid);
+      mysqli_real_escape_string($link, $query);
       $link=my_connect();
       if($query){
 	      $res=mysqli_query($link,"SELECT `id` FROM `try_match` WHERE `try_id`=".$mid." AND  `for_id`='".$uid."';");
@@ -360,6 +409,9 @@
 	    	$ff=gen_token();
 	    	move_uploaded_file($files['photo']['tmp_name'], '../img/'. $ff.".png");
 	    	$link=my_connect();
+	    	mysqli_real_escape_string($link, $id);
+	    	mysqli_real_escape_string($link, $name);
+	    	mysqli_real_escape_string($link, $author);
 	        $res=mysqli_query($link,"INSERT INTO `music` SET `author_name`='".$author."',`name`='".$name."',`photo`='https://salamport.newpage.xyz/img/".$ff.".png' , `file`='https://salamport.newpage.xyz/music/".$f.".mp3';");
 	        mysqli_close($link);
 			    return "true";
@@ -370,6 +422,8 @@
     function add_friend($mid,$uid){
       if($mid!=$uid){
 	      $link=my_connect();
+	      mysqli_real_escape_string($link, $mid);
+	      mysqli_real_escape_string($link, $uid);
 	      $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
 	      if($re=mysqli_fetch_assoc($res)){
 	         $res=mysqli_query($link,"UPDATE `friends` SET `status`=2 WHERE `user_id`='".$mid."' AND  `friend_id`='".$uid."';");
@@ -388,6 +442,7 @@
     }
     function show_friends($id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$id."'AND status=2;");
       $arr=array();
       while($re=mysqli_fetch_assoc($res)){
@@ -398,6 +453,7 @@
     }
     function show_friend_mb($id){
       $link=my_connect();
+      mysqli_real_escape_string($link, $id);
       $res=mysqli_query($link,"SELECT * FROM `friends` WHERE `user_id`='".$id."' AND status=1;");
       $arr=array();
       while($re=mysqli_fetch_assoc($res)){
@@ -408,6 +464,8 @@
     }
  	function users_search($query,$uid=false){
  	  $link=my_connect();
+ 	  mysqli_real_escape_string($link, $query);
+ 	  mysqli_real_escape_string($link, $uid);
       $res=mysqli_query($link,"SELECT `id` FROM `users` WHERE (`name`='".$query."' OR `surname`='".$query."') AND `id`<>".$uid.";");
       mysqli_close($link);
       if($re=mysqli_fetch_assoc($res)){
@@ -433,6 +491,7 @@
  	}
  	function music_info($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT * FROM `music` WHERE `id`=".$id.";");
  		mysqli_close($link);
       	if($re=mysqli_fetch_assoc($res)){
@@ -444,6 +503,7 @@
  	}
  	function search_music($name){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $name);
  		$res=mysqli_query($link,"SELECT `id` FROM `music` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -457,6 +517,9 @@
 	    $f=gen_token();
 	    move_uploaded_file($files['video']['tmp_name'], '../video/'.$f.".mp4");
 	    $link=my_connect();
+	    mysqli_real_escape_string($link, $id);
+	    mysqli_real_escape_string($link, $name);
+	    mysqli_real_escape_string($link, $text);
 	    $res=mysqli_query($link,"INSERT INTO `videos` SET `author`='".$id."',`text`='".$text."',`name`='".$name."', `file`='https://salamport.newpage.xyz/video/".$f.".mp4';");
 	    mysqli_close($link);
 		    return "true";
@@ -477,6 +540,7 @@
  	}
  	function video_info($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT * FROM `videos` WHERE `id`=".$id.";");
  		mysqli_close($link);
       	if($re=mysqli_fetch_assoc($res)){
@@ -488,6 +552,7 @@
  	}
  	function search_video($name){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $name);
  		$res=mysqli_query($link,"SELECT `id` FROM `videos` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -501,6 +566,7 @@
 	    $f=gen_token();
 	    move_uploaded_file($files['photo']['tmp_name'], '../photo/'.$f.".png");
 	    $link=my_connect();
+	    mysqli_real_escape_string($link, $id);
 	    $res=mysqli_query($link,"UPDATE `users` SET `photo`='https://salamport.newpage.xyz/photo/".$f.".png';");
 	    mysqli_close($link);
 		    return "true";
@@ -511,6 +577,8 @@
     }
  	function create_group($id,$name){
  	  $link=my_connect();
+ 	  mysqli_real_escape_string($link, $id);
+ 	  mysqli_real_escape_string($link, $name);
       $res=mysqli_query($link,"INSERT INTO `groups` SET `name`='".$name."', `author`='".$id."';");
       $ret=mysqli_insert_id($link);
       mysqli_close($link);
@@ -518,6 +586,7 @@
  	}
  	function group_info($group_id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $group_id);
  		$res=mysqli_query($link,"SELECT * FROM `groups` WHERE `id`=".$id.";");
  		mysqli_close($link);
       	if($re=mysqli_fetch_assoc($res)){
@@ -542,6 +611,7 @@
 	    $f=gen_token();
 	    move_uploaded_file($files['photo']['tmp_name'], '../photo/'.$f.".png");
 	    $link=my_connect();
+	    mysqli_real_escape_string($link, $id);
 	    $res=mysqli_query($link,"UPDATE `groups` SET `photo`='https://salamport.newpage.xyz/photo/".$f.".png';");
 	    mysqli_close($link);
 		    return "true";
@@ -552,6 +622,7 @@
     }
     function search_groups($name){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $name);
  		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -562,6 +633,10 @@
  	}
  	function edit_groups($id,$gid,$name,$text){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
+ 		mysqli_real_escape_string($link, $gid);
+ 		mysqli_real_escape_string($link, $name);
+ 		mysqli_real_escape_string($link, $text);
  		if(check_group_owner($id,$gid)){
  			$res=mysqli_query($link,"INSERT INTO `groups` SET `text`='".$text."', `name`='".$name."', WHERE `id`='".$id."';");
  		}
@@ -569,6 +644,10 @@
         return json_encode($arr);
  	}
  	function sub_group($id,$gid,$query){
+ 		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
+ 		mysqli_real_escape_string($link, $gid);
+ 		mysqli_real_escape_string($link, $query);
  		$res=mysqli_query($link,"SELECT `id` FROM `groups_members` WHERE `member_id` ='".$id."' AND `group_id`='".$gid."';");
  		if(mysqli_num_rows($res)>0){
  			if($query){
@@ -591,6 +670,8 @@
  	}
  	function check_group_owner($id,$gid){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
+ 		mysqli_real_escape_string($link, $gid);
  		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `author` ='".$id."' AND `id`='".$gid."';");
  		if(mysqli_num_rows($res)>0){
  			return true;
@@ -601,6 +682,7 @@
  	}
  	function show_subs($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -611,6 +693,7 @@
  	}
  	function show_followers($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -622,6 +705,9 @@
  	function create_post($id,$gid,$text){
  		if(check_group_owner($id,$gid)){
  			$link=my_connect();
+ 			mysqli_real_escape_string($link, $id);
+ 			mysqli_real_escape_string($link, $gid);
+ 			mysqli_real_escape_string($link, $text);
  			$res=mysqli_query($link,"INSERT INTO `posts` SET `group_id`='".$gid."',`member_id`='".$id."',`text`='".$text."';");
 			$rid=mysqli_insert_id($link);
 		    mysqli_close($link);
@@ -633,12 +719,14 @@
  	}
  	function post_view($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT * FROM `posts` WHERE `id`='".$id."';");
 	    mysqli_close($link);
 	    return json_encode(mysqli_fetch_assoc($res));
  	}
  	function feed($id){
  		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT `posts`.`id` `id` FROM `posts` INNER JOIN `groups_members` ON `groups_members`.`group_id`=`posts`.`group_id`  WHERE `groups_members`.`member_id`='".$id."';");
 	    $arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -647,16 +735,4 @@
       	mysqli_close($link);
         return json_encode($arr);
  	}
-
-
-
-
-
-
-
-
-
-
-
-
 ?>
