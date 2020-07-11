@@ -429,8 +429,8 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
  	function music_info($id){
  		$link=my_connect();
@@ -450,8 +450,8 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
  	function add_video($id,$name,$text,$files){
 		if(substr($files['video']['name'],strlen($files['video']['name'])-4,strlen($files['video']['name'])-1)==".mp4") { 
@@ -473,8 +473,8 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
  	function video_info($id){
  		$link=my_connect();
@@ -494,8 +494,8 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
  	function update_profile_photo($id,$files){
 		if(substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
@@ -535,8 +535,8 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
  	function update_group_photo($id,$files){
 		if(substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
@@ -558,13 +558,57 @@
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
       	}
+      	mysqli_close($link);
         return json_encode($arr);
-        mysqli_close($link);
  	}
-
-
-
-
+ 	function edit_groups($id,$gid,$name,$text){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `author` ='".$id."' AND `id`='".$gid."';");
+ 		if(mysqli_num_rows($res)>0){
+ 			$res=mysqli_query($link,"INSERT INTO `groups` SET `text`='".$text."', `name`='".$name."', WHERE `id`='".$id."';");
+ 		}
+ 		mysqli_close($link);
+        return json_encode($arr);
+ 	}
+ 	function sub_group($id,$gid,$query){
+ 		$res=mysqli_query($link,"SELECT `id` FROM `groups_members` WHERE `member_id` ='".$id."' AND `chat_id`='".$gid."';");
+ 		if(mysqli_num_rows($res)>0){
+ 			if($query){
+ 				return false;
+ 			}
+ 			else{
+ 				$res=mysqli_query($link,"DELETE FROM `groups_members` WHERE `member_id`='".$id."' AND `chat_id`='".$gid."';");
+ 				return true;
+ 			}
+ 		}
+ 		else{
+ 			if($query){
+ 				$res=mysqli_query($link,"INSERT INTO `groups_members` SET `member_id`='".$id."',`chat_id`='".$gid."';");
+ 				return true;
+ 			}
+ 			else{
+ 				return false;
+ 			}
+ 		}
+ 	}
+ 	function show_subs($id){
+ 		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+      	mysqli_close($link);
+        return json_encode($arr);
+ 	}
+ 	function show_followers($id){
+ 		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+      	mysqli_close($link);
+        return json_encode($arr);
+ 	}
 
 
 
