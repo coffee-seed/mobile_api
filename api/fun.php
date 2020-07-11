@@ -333,7 +333,6 @@
       while($re=mysqli_fetch_assoc($res)){
        	array_push($arr, $re['id']);
       }
-      mysqli_close($link);
       return json_encode($arr);
     }
     function set_matches($uid,$mid,$query){
@@ -563,27 +562,26 @@
  	}
  	function edit_groups($id,$gid,$name,$text){
  		$link=my_connect();
- 		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `author` ='".$id."' AND `id`='".$gid."';");
- 		if(mysqli_num_rows($res)>0){
+ 		if(check_group_owner($id,$gid)){
  			$res=mysqli_query($link,"INSERT INTO `groups` SET `text`='".$text."', `name`='".$name."', WHERE `id`='".$id."';");
  		}
  		mysqli_close($link);
         return json_encode($arr);
  	}
  	function sub_group($id,$gid,$query){
- 		$res=mysqli_query($link,"SELECT `id` FROM `groups_members` WHERE `member_id` ='".$id."' AND `chat_id`='".$gid."';");
+ 		$res=mysqli_query($link,"SELECT `id` FROM `groups_members` WHERE `member_id` ='".$id."' AND `group_id`='".$gid."';");
  		if(mysqli_num_rows($res)>0){
  			if($query){
  				return false;
  			}
  			else{
- 				$res=mysqli_query($link,"DELETE FROM `groups_members` WHERE `member_id`='".$id."' AND `chat_id`='".$gid."';");
+ 				$res=mysqli_query($link,"DELETE FROM `groups_members` WHERE `member_id`='".$id."' AND `groupt_id`='".$gid."';");
  				return true;
  			}
  		}
  		else{
  			if($query){
- 				$res=mysqli_query($link,"INSERT INTO `groups_members` SET `member_id`='".$id."',`chat_id`='".$gid."';");
+ 				$res=mysqli_query($link,"INSERT INTO `groups_members` SET `member_id`='".$id."',`group_id`='".$gid."';");
  				return true;
  			}
  			else{
@@ -591,7 +589,18 @@
  			}
  		}
  	}
+ 	function check_group_owner($id,$gid){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `author` ='".$id."' AND `id`='".$gid."';");
+ 		if(mysqli_num_rows($res)>0){
+ 			return true;
+ 		}
+ 		else{
+ 			return false;
+ 		}
+ 	}
  	function show_subs($id){
+ 		$link=my_connect();
  		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -601,6 +610,7 @@
         return json_encode($arr);
  	}
  	function show_followers($id){
+ 		$link=my_connect();
  		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
@@ -609,8 +619,34 @@
       	mysqli_close($link);
         return json_encode($arr);
  	}
-
-
+ 	function create_post($id,$gid,$text){
+ 		if(check_group_owner($id,$gid)){
+ 			$link=my_connect();
+ 			$res=mysqli_query($link,"INSERT INTO `posts` SET `group_id`='".$gid."',`member_id`='".$id."',`text`='".$text."';");
+			$rid=mysqli_insert_id($link);
+		    mysqli_close($link);
+	        return json_encode(array(0=>$rid));  
+      	}
+      	else{
+        	return false;
+        }
+ 	}
+ 	function post_view($id){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT * FROM `posts` WHERE `id`='".$id."';");
+	    mysqli_close($link);
+	    return json_encode(mysqli_fetch_assoc($res));
+ 	}
+ 	function feed($id){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `posts`.`id` `id` FROM `posts` INNER JOIN `groups_members` ON `groups_members`.`group_id`=`posts`.`group_id`  WHERE `groups_members`.`member_id`='".$id."';");
+	    $arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+      	mysqli_close($link);
+        return json_encode($arr);
+ 	}
 
 
 
