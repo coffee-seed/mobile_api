@@ -735,4 +735,15 @@
       	mysqli_close($link);
         return json_encode($arr);
  	}
+ 	function group_posts($id){
+ 		$link=my_connect();
+ 		mysqli_real_escape_string($link, $id);
+ 		$res=mysqli_query($link,"SELECT `id` FROM `posts`  WHERE `group_id`='".$id."';");
+	    $arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+      	mysqli_close($link);
+        return json_encode($arr);
+ 	}
 ?>
