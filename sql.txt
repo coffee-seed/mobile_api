@@ -82,7 +82,7 @@ CREATE TABLE `groups`(
         `text`         VARCHAR(255),
         `name`         VARCHAR(255),
         `date`         INT(11),
-        `photo`         LONGTEXT,
+        `photo`        LONGTEXT,
         PRIMARY KEY(id)
 );
 

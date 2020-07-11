@@ -497,4 +497,86 @@
         return json_encode($arr);
         mysqli_close($link);
  	}
+ 	function update_profile_photo($id,$files){
+		if(substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
+	    $f=gen_token();
+	    move_uploaded_file($files['photo']['tmp_name'], '../photo/'.$f.".png");
+	    $link=my_connect();
+	    $res=mysqli_query($link,"UPDATE `users` SET `photo`='https://salamport.newpage.xyz/photo/".$f.".png';");
+	    mysqli_close($link);
+		    return "true";
+		} 
+		else {
+			return "false";
+		}
+    }
+ 	function create_group($id,$name){
+ 	  $link=my_connect();
+      $res=mysqli_query($link,"INSERT INTO `groups` SET `name`='".$name."', `author`='".$id."';");
+      $ret=mysqli_insert_id($link);
+      mysqli_close($link);
+      return $ret;
+ 	}
+ 	function group_info($group_id){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT * FROM `groups` WHERE `id`=".$id.";");
+ 		mysqli_close($link);
+      	if($re=mysqli_fetch_assoc($res)){
+      		return json_encode($re);
+      	}
+      	else{
+        	return false;
+        }		
+ 	}
+ 	function group_list(){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `videos` ORDER BY `id` DESC LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
+ 	}
+ 	function update_group_photo($id,$files){
+		if(substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
+	    $f=gen_token();
+	    move_uploaded_file($files['photo']['tmp_name'], '../photo/'.$f.".png");
+	    $link=my_connect();
+	    $res=mysqli_query($link,"UPDATE `groups` SET `photo`='https://salamport.newpage.xyz/photo/".$f.".png';");
+	    mysqli_close($link);
+		    return "true";
+		} 
+		else {
+			return "false";
+		}
+    }
+    function search_groups($name){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `groups` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
+ 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ?>
