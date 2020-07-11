@@ -276,8 +276,6 @@
       mysqli_close($link);
       return json_encode(get_auth_token(($ret)),JSON_UNESCAPED_UNICODE);;
     }
-    /*
-    */
     function set_dating_status($user_id,$use){
       $link=my_connect();
       $res=mysqli_query($link,"SELECT `use` FROM `dating` WHERE `user_id`='".$user_id."';");
@@ -304,16 +302,17 @@
     function get_dating($my_id,$radius,$sex,$min_b,$max_b){
       $link=my_connect();
       $res=mysqli_query($link, "SELECT `latitude`, `longitude` FROM `last_geo` WHERE `user_id`=".$my_id.";");
-      if($re=mysqli_fetch_assoc($res)){
-	      $ress=mysqli_query($link, "SELECT `users`.`id` `id` `last_geo`.`id` `lat`,`last_geo`.'longitude' 'lon'  from `users` INNER JOIN `dating` ON `dating`.`user_id`=`users`.`id` INNER JOIN `last_geo` ON `last_geo`.`user_id`=`users`.`id` LEFT JOIN `match`  ON (`match`.`user1`=`users`.`id` AND  `match`.`user2`=".$my_id.") OR (`match`.`user1`=".$my_id." AND  `match`.`user2`=`users`.`id`) LEFT JOIN `unmatch` ON (`unmatch`.`user1`=`users`.`id` AND `unmatch`.`user2`=".$my_id.") OR (`unmatch`.`user2`=`users`.`id` AND `unmatch`.`user1`=".$my_id.") LEFT JOIN `try_match`  ON `try_match`.`for_id`=`users`.`id` AND `try_match`.`try_id`=".$my_id." WHERE `dating`.`use`>0 AND `last_geo`.`latitude`>".$re['latitude']-$radius." AND `last_geo`.`latitude`<".$re['latitude']+$radius." AND `last_geo`.`longitude`>".$re['longitude']-$radius." AND `last_geo`.`longitude`<".$re['longitude']+$radius." AND `users`.`birthdate`>".$min_b." AND `users`.`birthdate`<".$max_b." AND `users`.`id`<>".$id." AND `users`.`sex`=".$sex.";"); 
+      if($ree=mysqli_fetch_assoc($res)){
+	      $ress=mysqli_query($link, "SELECT `users`.`id` `id`, `last_geo`.`latitude` `lat`,`last_geo`.`longitude` `lon`  from `users` INNER JOIN `dating` ON `dating`.`user_id`=`users`.`id` INNER JOIN `last_geo` ON `last_geo`.`user_id`=`users`.`id` LEFT JOIN `match`  ON (`match`.`user1`=`users`.`id` AND  `match`.`user2`=".$my_id.") OR (`match`.`user1`=".$my_id." AND  `match`.`user2`=`users`.`id`) LEFT JOIN `unmatch` ON (`unmatch`.`user1`=`users`.`id` AND `unmatch`.`user2`=".$my_id.") OR (`unmatch`.`user2`=`users`.`id` AND `unmatch`.`user1`=".$my_id.") LEFT JOIN `try_match`  ON `try_match`.`for_id`=`users`.`id` AND `try_match`.`try_id`=".$my_id." WHERE `dating`.`use`>0 AND `last_geo`.`latitude`>".
+	      	floatval(floatval($ree['latitude'])-floatval($radius))." AND `last_geo`.`latitude`<".floatval(floatval($ree['latitude'])+floatval($radius))." AND `last_geo`.`longitude`>".floatval(floatval($ree['longitude'])-floatval($radius))." AND `last_geo`.`longitude`<".floatval(floatval($ree['longitude'])+floatval($radius))." AND `users`.`birthdate`>'".$min_b."' AND `users`.`birthdate`<'".$max_b."' AND `users`.`id`<>".$my_id." AND `users`.`sex`=".$sex.";");
 	    $arr=array();
 	    while($re=mysqli_fetch_assoc($ress)){
-	    	$$radius=ceil(12745594 * asin(sqrt(
-        pow(sin(deg2rad($re['lat']-$re['latitude'])/2),2)
+	    	$radius=ceil(12745594 * asin(sqrt(
+        pow(sin(deg2rad($re['lat']-$ree['latitude'])/2),2)
         +
-        cos(deg2rad($re['latitude'])) *
+        cos(deg2rad($ree['latitude'])) *
         cos(deg2rad($re['lat'])) *
-        pow(sin(deg2rad($re['longitude'] -$re['lon'])/2),2))));
+        pow(sin(deg2rad($ree['longitude'] -$re['lon'])/2),2))));
 	    	array_push($arr,array('id'=>$re['id'],'radius'=>$radius));
 	    }
 	    return json_encode($arr);
@@ -321,6 +320,53 @@
 	  else{
 	  	return "err_need_geo";
 	  }
+    }
+    function get_matches($id){
+      $link=my_connect();
+      $arr=array();
+      $res=mysqli_query($link,"SELECT `user1` `id` FROM `match` WHERE `user2`='".$id."';");
+	  while($re=mysqli_fetch_assoc($res)){
+       	array_push($arr, $re['id']);
+      }
+      $res=mysqli_query($link,"SELECT `user2` `id` FROM `match` WHERE `user1`='".$id."';");
+      mysqli_close($link);
+      while($re=mysqli_fetch_assoc($res)){
+       	array_push($arr, $re['id']);
+      }
+      mysqli_close($link);
+      return json_encode($arr);
+    }
+    function set_matches($uid,$mid,$query){
+      $link=my_connect();
+      if($query){
+	      $res=mysqli_query($link,"SELECT `id` FROM `try_match` WHERE `try_id`=".$mid." AND  `for_id`='".$uid."';");
+	      if($re=mysqli_fetch_assoc($res)){
+	      	$res=mysqli_query($link,"DELETE FROM `try_match` WHERE `id`=".$res['id'].";");
+	        $res=mysqli_query($link,"INSERT INTO `match`SET `user`='".$uid."',`user2`='".$mid."';");
+	  	  }
+	  	  else{
+	  	  	$res=mysqli_query($link,"INSERT INTO `try_match` SET `try_match`=".$uid.", `for_id`='".$mid."';");
+	  	  }
+  	  }
+  	  else{
+  	  	  $res=mysqli_query($link,"INSERT INTO `unmatch`SET `user`='".$uid."',`user2`='".$mid."';");
+  	  }
+      mysqli_close($link);
+      return json_encode($arr);
+    }
+    function add_music($id,$name,$author,$files){
+		if(substr($files['music']['name'],strlen($files['music']['name'])-4,strlen($files['music']['name'])-1)==".mp3" AND substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
+	    	$f=gen_token();
+	    	move_uploaded_file($files['music']['tmp_name'], '../music/'.$f.".mp3");
+	    	$ff=gen_token();
+	    	move_uploaded_file($files['photo']['tmp_name'], '../img/'. $ff.".png");
+	    	$link=my_connect();
+	        $res=mysqli_query($link,"INSERT INTO `music` SET `author_name`='".$author."',`name`='".$name."',`photo`='https://salamport.newpage.xyz/img/".$ff.".png' , `file`='https://salamport.newpage.xyz/music/".$f.".mp3';");
+	        mysqli_close($link);
+			    return "true";
+			} else {
+			    return "false";
+			}
     }
     function add_friend($mid,$uid){
       if($mid!=$uid){
@@ -337,6 +383,7 @@
 	        return true;
 	    }
 	    else{
+	    	mysqli_close($link);
 	    	return "false";
 	    }
     }
@@ -374,5 +421,80 @@
       else{
         return false;
       }
+ 	}
+ 	function show_all_music(){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `music` ORDER BY `id` DESC LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
+ 	}
+ 	function music_info($id){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT * FROM `music` WHERE `id`=".$id.";");
+ 		mysqli_close($link);
+      	if($re=mysqli_fetch_assoc($res)){
+      		return json_encode($re);
+      	}
+      	else{
+        	return false;
+        }
+ 	}
+ 	function search_music($name){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `music` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
+ 	}
+ 	function add_video($id,$name,$text,$files){
+		if(substr($files['video']['name'],strlen($files['video']['name'])-4,strlen($files['video']['name'])-1)==".mp4") { 
+	    $f=gen_token();
+	    move_uploaded_file($files['video']['tmp_name'], '../video/'.$f.".mp4");
+	    $link=my_connect();
+	    $res=mysqli_query($link,"INSERT INTO `videos` SET `author`='".$id."',`text`='".$text."',`name`='".$name."', `file`='https://salamport.newpage.xyz/video/".$f.".mp4';");
+	    mysqli_close($link);
+		    return "true";
+		} 
+		else {
+			return "false";
+		}
+    }
+    function show_all_video(){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `videos` ORDER BY `id` DESC LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
+ 	}
+ 	function video_info($id){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT * FROM `videos` WHERE `id`=".$id.";");
+ 		mysqli_close($link);
+      	if($re=mysqli_fetch_assoc($res)){
+      		return json_encode($re);
+      	}
+      	else{
+        	return false;
+        }
+ 	}
+ 	function search_video($name){
+ 		$link=my_connect();
+ 		$res=mysqli_query($link,"SELECT `id` FROM `videos` WHERE `name` LIKE '%".$name."%' LIMIT 100 ;");
+ 		$arr=array();
+      	while($re=mysqli_fetch_assoc($res)){
+      		array_push($arr,$re['id']);
+      	}
+        return json_encode($arr);
+        mysqli_close($link);
  	}
 ?>

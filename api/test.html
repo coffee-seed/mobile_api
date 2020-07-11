@@ -1,161 +1,228 @@
 <h2>normal_auth.php</h2>
 <form method='post' action='normal_auth.php'>
-Login<input name='login'>
-Password<input name='password'>
+Login<input required required name='login'>
+Password<input required required name='password'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>normal_reg.php</h2>
 <form method='post' action='normal_reg.php'>
-Login<input name='login'>
-Password<input name='password'>
-Email<input name='email'>
-Name<input name='name'>
-Surname<input name='surname'>
+Login<input required required name='login'>
+Password<input required required name='password'>
+Email<input required required name='email'>
+Name<input required required name='name'>
+Surname<input required required name='surname'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>lk.php</h2>
 <form method='post' action='lk.php'>
-Session<input name='session'>
-Token<input name='token'>
+Session<input required required name='session'>
+Token<input required name='token'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>my_dating_status.php</h2>
 <form method='post' action='my_dating_status.php'>
-Session<input name='session'>
-Token<input name='token'>
+Session<input required name='session'>
+Token<input required name='token'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>set_dating_status.php</h2>
 <form method='post' action='set_dating_status.php'>
-Session<input name='session'>
-Token<input name='token'>
-Use<input name='use'>
+Session<input required name='session'>
+Token<input required name='token'>
+Use<input required name='use'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>get_dating.php</h2>
 <form method='post' action='get_dating.php'>
-Session<input name='session'>
-Token<input name='token'>
-Radius (part of lat)<input name='radius'>
-$ex (1 - man, 2 -woman)<input name='sex'>
-min_b (Date format 2020-01-01)<input name='min_b'>
-max_b (Date format 2020-01-01)<input name='max_b'>
+Session<input required name='session'>
+Token<input required name='token'>
+Radius (part of lat)<input required name='radius'>
+$ex (1 - man, 2 -woman)<input required name='sex'>
+min_b (Date format 2020-01-01)<input required name='min_b'>
+max_b (Date format 2020-01-01)<input required name='max_b'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>friends.php</h2>
 <form method='post' action='friends.php'>
-Session<input name='session'>
-Token<input name='token'>
+Session<input required name='session'>
+Token<input required name='token'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>friends_mb.php</h2>
 <form method='post' action='friends_mb.php'>
-Session<input name='session'>
-Token<input name='token'>
+Session<input required name='session'>
+Token<input required name='token'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>add_friend.php</h2>
 <form method='post' action='add_friend.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Friend id<input name='friend_id'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Friend id<input required name='friend_id'>
   <input  type='submit'>
 </form>
 <hr>
 <h2>view_profile.php</h2>
 <form method='post' action='view_profile.php'>
-Session<input name='session'>
-Token<input name='token'>
-User id<input name='user_id'>
+Session<input required name='session'>
+Token<input required name='token'>
+User id<input required name='user_id'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>search_people.php</h2>
 <form method='post' action='search_people.php'>
-Session<input name='session'>
-Token<input name='token'>
-Query<input name='query'>
+Session<input required name='session'>
+Token<input required name='token'>
+Query<input required name='query'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>create_chat.php</h2>
 <form method='post' action='create_chat.php'>
-Session<input name='session'>
-Token<input name='token'>
-Name<input name='name'>
+Session<input required name='session'>
+Token<input required name='token'>
+Name<input required name='name'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>get_messages.php</h2>
 <form method='post' action='get_messages.php'>
-Session<input name='session'>
-Token<input name='token'>
+Session<input required name='session'>
+Token<input required name='token'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>chat_info.php</h2>
 <form method='post' action='chat_info.php'>
-Session<input name='session'>
-Token<input name='token'>
-Chat id<input name='chat_id'>
+Session<input required name='session'>
+Token<input required name='token'>
+Chat id<input required name='chat_id'>
 <input  type='submit'>
 </form>
 <hr>
 <h2>chat_messages.php</h2>
 <form method='post' action='chat_messages.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Chat id<input name='chat_id'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Chat id<input required name='chat_id'>
   <input  type='submit'>
 </form>
 <hr>
 <h2>chat_members.php</h2>
 <form method='post' action='chat_members.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Chat id<input name='chat_id'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Chat id<input required name='chat_id'>
   <input  type='submit'>
 </form>
 <hr>
 <h2>add_message.php</h2>
 <form method='post' action='add_message.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Chat id<input name='chat_id'>
-  <textarea name='text'></textarea>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Chat id<input required name='chat_id'>
+  <textarea required name='text'></textarea>
   <input  type='submit'>
 </form>
 <hr>
 <h2>add_chat_members.php</h2>
 <form method='post' action='add_chat_members.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Chat id<input name='chat_id'>
-  Member id<input name='member_id'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Chat id<input required name='chat_id'>
+  Member id<input required name='member_id'>
   <input  type='submit'>
 </form>
 <hr>
 <h2>create_chat_priv.php</h2>
 <form method='post' action='create_chat_priv.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Member id<input name='member_id'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Member id<input required name='member_id'>
   <input  type='submit'>
 </form>
 <hr>
 <h2>send_geo.php</h2>
 <form method='post' action='send_geo.php'>
-  Session<input name='session'>
-  Token<input name='token'>
-  Lat<input name='lat'>
-  Lon<input name='lon'>
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Lat<input required name='lat'>
+  Lon<input required name='lon'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>add_music.php</h2>
+<form method='post' action='add_music.php' enctype="multipart/form-data">
+  Session<input required name='session'>
+  Token<input required name='token'>
+  Name<input required name='name'>
+  Author<input required name='author'>
+  File <input  required name="music"  type="file">
+  Logo <input  required name="photo"  type="file">
+  <input  type='submit'>
+</form>
+<hr>
+<h2>all_music.php</h2>
+<form method='post' action='all_music.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>music_info.php</h2>
+<form method='post' action='music_info.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  Music id<input required required name='music_id'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>search_music.php</h2>
+<form method='post' action='search_music.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  Name<input required required name='name'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>add_video.php</h2>
+<form method='post' action='add_video.php' enctype="multipart/form-data">
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  Name<input required required name='name'>
+  Text<input required required name='text'>
+  File <input  required required name="video"  type="file">
+  <input  type='submit'>
+</form>
+<hr>
+<h2>all_video.php</h2>
+<form method='post' action='all_video.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>video_info.php</h2>
+<form method='post' action='video_info.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  video id<input required required name='video_id'>
+  <input  type='submit'>
+</form>
+<hr>
+<h2>search_video.php</h2>
+<form method='post' action='search_video.php'>
+  Session<input required required name='session'>
+  Token<input required required name='token'>
+  Name<input required required name='name'>
   <input  type='submit'>
 </form>
