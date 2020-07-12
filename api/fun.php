@@ -204,7 +204,7 @@
     function vk_auth($vk_id,$token){
       $ans=json_decode(file_get_contents("https://api.vk.com/method/users.get?fields=photo_400_orig,sex,bdate,city,home_town&v=5.120&access_token=".$token),true);
       $link=my_connect();
-      mysqli_real_escape_string($link, $vK_id);
+      mysqli_real_escape_string($link, $vk_id);
       mysqli_real_escape_string($link, $token);
       if(isset($ans['response']['0']['id'])){
         if($ans['response']['0']['id']==$vk_id){
@@ -225,7 +225,7 @@
           	$photo=NULL;
           }
           if(isset($ans['response']['0']['bdate'])){
-            $bdate=$ans['response']['0']['bdate'];
+            $bdate=ate('Y-m-d', strtotime($ans['response']['0']['bdate']));
           }
           else{
           	$bdate=NULL;
@@ -382,25 +382,26 @@
       return json_encode($arr);
     }
     function set_matches($uid,$mid,$query){
+      $link=my_connect();
       mysqli_real_escape_string($link, $uid);
       mysqli_real_escape_string($link, $mid);
       mysqli_real_escape_string($link, $query);
-      $link=my_connect();
       if($query){
 	      $res=mysqli_query($link,"SELECT `id` FROM `try_match` WHERE `try_id`=".$mid." AND  `for_id`='".$uid."';");
 	      if($re=mysqli_fetch_assoc($res)){
-	      	$res=mysqli_query($link,"DELETE FROM `try_match` WHERE `id`=".$res['id'].";");
-	        $res=mysqli_query($link,"INSERT INTO `match`SET `user`='".$uid."',`user2`='".$mid."';");
+	      	$res=mysqli_query($link,"DELETE FROM `try_match` WHERE `for_id`=".$uid." AND `try_id`=".$mid.";");
+	      	$res=mysqli_query($link,"DELETE FROM `try_match` WHERE `for_id`=".$mid." AND `try_id`=".$uid.";");
+	        $res=mysqli_query($link,"INSERT INTO `match` SET `user1`='".$uid."',`user2`='".$mid."';");
 	  	  }
 	  	  else{
-	  	  	$res=mysqli_query($link,"INSERT INTO `try_match` SET `try_match`=".$uid.", `for_id`='".$mid."';");
+	  	  	$res=mysqli_query($link,"INSERT INTO `try_match` SET `try_id`=".$uid.", `for_id`='".$mid."';");
 	  	  }
   	  }
   	  else{
-  	  	  $res=mysqli_query($link,"INSERT INTO `unmatch`SET `user`='".$uid."',`user2`='".$mid."';");
+  	  	  $res=mysqli_query($link,"INSERT INTO `unmatch` SET `user1`='".$uid."',`user2`='".$mid."';");
   	  }
       mysqli_close($link);
-      return json_encode($arr);
+      return "true";
     }
     function add_music($id,$name,$author,$files){
 		if(substr($files['music']['name'],strlen($files['music']['name'])-4,strlen($files['music']['name'])-1)==".mp3" AND substr($files['photo']['name'],strlen($files['photo']['name'])-4,strlen($files['photo']['name'])-1)==".png") { 
@@ -587,10 +588,10 @@
  	function group_info($group_id){
  		$link=my_connect();
  		mysqli_real_escape_string($link, $group_id);
- 		$res=mysqli_query($link,"SELECT * FROM `groups` WHERE `id`=".$id.";");
+ 		$res=mysqli_query($link,"SELECT * FROM `groups` WHERE `id`=".$group_id.";");
  		mysqli_close($link);
       	if($re=mysqli_fetch_assoc($res)){
-      		return json_encode($re);
+      		return json_encode($re,JSON_UNESCAPED_UNICODE);
       	}
       	else{
         	return false;
@@ -683,7 +684,7 @@
  	function show_subs($id){
  		$link=my_connect();
  		mysqli_real_escape_string($link, $id);
- 		$res=mysqli_query($link,"SELECT `chat_id` FROM `groups_members` WHERE `member_id` ='".$id."';");
+ 		$res=mysqli_query($link,"SELECT `group_id` `id` FROM `groups_members` WHERE `member_id` ='".$id."';");
  		$arr=array();
       	while($re=mysqli_fetch_assoc($res)){
       		array_push($arr,$re['id']);
@@ -722,7 +723,7 @@
  		mysqli_real_escape_string($link, $id);
  		$res=mysqli_query($link,"SELECT * FROM `posts` WHERE `id`='".$id."';");
 	    mysqli_close($link);
-	    return json_encode(mysqli_fetch_assoc($res));
+	    return json_encode(mysqli_fetch_assoc($res),JSON_UNESCAPED_UNICODE);
  	}
  	function feed($id){
  		$link=my_connect();
